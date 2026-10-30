@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zebra Robotics Idea Board</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* Layout: brand-blue header band; working row = idea form (left) + idea map (right); full idea list below. */
+:root{
+  --bg:#F3F6F8; --surface:#FFFFFF; --surface-2:#E9F2F8; --fg:#2E2F2E; --muted:#5F6B70; --line:#D3DADD;
+  --brand:#3C6496; --on-brand:#FFFFFF; --sky:#55AFE1; --idea:#FFDB6E; --idea-ink:#3A3320; --edge:#A9B4B8; --danger:#B2481A;
+  --band:#3C6496; --band-fg:#FFFFFF;
+  --f-display:"Sora","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#17191A; --surface:#202425; --surface-2:#1E2A33; --fg:#E7EAEB; --muted:#A3AEB2; --line:#353C3F;
+  --brand:#8DB4E2; --on-brand:#17191A; --sky:#64C3D2; --idea:#E8C55A; --idea-ink:#2A2414; --edge:#5A6569; --danger:#F08A5C;
+  --band:#22344D; --band-fg:#F1F5F8; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+[hidden]{display:none!important}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--band);color:var(--band-fg)}
+header .wrap{padding-block:22px 20px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 24px}
+header h1{font-size:clamp(22px,3vw,28px);font-weight:700;letter-spacing:-.01em}
+header p{margin:4px 0 0;opacity:.85;max-width:60ch}
+.stats{margin-left:auto;display:flex;gap:18px;font-variant-numeric:tabular-nums}
+.stat b{display:block;font-family:var(--f-display);font-size:22px;line-height:1.1}
+.stat span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+main .wrap{padding-block:20px 40px;display:flex;flex-direction:column;gap:24px}
+.notice{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:10px 14px;margin:0}
+.notice.err{border-color:var(--danger)}
+.row{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.row{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.panel-head{padding:14px 16px 0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.panel-head h2{font-size:17px;font-weight:600}
+.panel-head small{color:var(--muted)}
+form{padding:12px 16px 16px;display:flex;flex-direction:column;gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:14px}
+label .hint{font-weight:400;color:var(--muted);font-size:13px}
+input,textarea{font:inherit;font-weight:400;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:76px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,.card:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+button{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.form-msg{font-size:14px;min-height:1.2em;margin:0}
+.form-msg.err{color:var(--danger)}
+/* passcode gate */
+.gate{max-width:420px;margin:40px auto}
+.gate form{padding:18px 20px 20px}
+.gate p{margin:0;color:var(--muted)}
+.map-tools{padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.map-tools input{width:auto;flex:1 1 180px;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px}
+.chip button{padding:0 4px;border:0;background:transparent;font-weight:700;color:var(--muted)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);padding:8px 16px 12px}
+.legend i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px;border:1px solid var(--edge)}
+.legend .p{border-radius:50%;background:var(--sky)} .legend .i{border-radius:3px;background:var(--idea)}
+.map{position:relative;height:clamp(360px,58vh,600px);touch-action:none}
+canvas{display:block;width:100%;height:100%;cursor:grab}
+canvas.dragging{cursor:grabbing}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px;color:var(--muted)}
+.empty h3{color:var(--fg);font-size:17px}
+.detail{position:absolute;top:12px;right:12px;width:min(340px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.12);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+@media (max-width:600px){.detail{position:static;width:auto;max-height:none;margin:12px;box-shadow:none}.map{height:auto}.map canvas{height:340px}}
+.detail h3{font-size:17px;padding-right:28px}
+.detail .close{position:absolute;top:8px;right:8px;border:0;padding:2px 8px;font-size:18px;background:transparent;color:var(--muted)}
+.meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;flex-wrap:wrap}
+.sec h4{margin:0 0 2px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand);font-family:var(--f-body)}
+.sec p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.list-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.list-head h2{font-size:20px}
+.list-head small{color:var(--muted)}
+.list-head button{margin-left:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.card:hover{border-color:var(--brand)}
+.card.sel{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.card h3{font-size:16px;font-weight:600}
+.card .gap{margin:0;color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:600;z-index:20}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div>
+      <h1>Zebra Robotics Idea Board</h1>
+      <p>Share an idea for growing Zebra Robotics. Each one records the current state, the gap and what to do, and the map shows who is behind which idea.</p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><b id="statIdeas">0</b><span>Ideas</span></div>
+      <div class="stat"><b id="statPeople">0</b><span>Contributors</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="notice" id="notice" hidden></p>
+
+    <!-- Passcode gate -->
+    <section class="panel gate" id="gate" aria-labelledby="gateTitle" hidden>
+      <form id="gateForm" novalidate>
+        <h2 id="gateTitle" style="font-size:18px">Enter the team passcode</h2>
+        <p>Ask Maddy for the passcode if you don't have it.</p>
+        <label for="gPass">Passcode<input id="gPass" type="password" autocomplete="current-password" required></label>
+        <button class="primary" type="submit" id="gateBtn">Open the board</button>
+        <p class="form-msg" id="gateMsg" role="status"></p>
+      </form>
+    </section>
+
+    <div id="board" hidden style="display:flex;flex-direction:column;gap:24px">
+      <div class="row">
+        <section class="panel" aria-labelledby="formTitle">
+          <div class="panel-head"><h2 id="formTitle">Submit an idea</h2></div>
+          <form id="ideaForm" novalidate>
+            <label for="fName">Your name<input id="fName" maxlength="80" autocomplete="name" required></label>
+            <label for="fTitle">Short title <span class="hint">Shown on the map, up to 80 characters</span>
+              <input id="fTitle" maxlength="80" required placeholder="e.g. Weekend robotics camps at every lab"></label>
+            <label for="fState">Current state <span class="hint">What is happening today?</span>
+              <textarea id="fState" maxlength="2000" required></textarea></label>
+            <label for="fGap">Gap <span class="hint">What is missing or not working?</span>
+              <textarea id="fGap" maxlength="2000" required></textarea></label>
+            <label for="fTodo">What to do <span class="hint">Your proposed actions</span>
+              <textarea id="fTodo" maxlength="3000" required></textarea></label>
+            <button class="primary" type="submit" id="submitBtn">Add idea</button>
+            <p class="form-msg" id="formMsg" role="status"></p>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="mapTitle">
+          <div class="panel-head"><h2 id="mapTitle">Idea map</h2><small>Drag to move, scroll to zoom, select an idea to read it</small></div>
+          <div class="map-tools">
+            <input id="search" type="search" placeholder="Search ideas" aria-label="Search ideas">
+            <span class="chip" id="personChip" hidden><span id="personChipName"></span><button type="button" id="clearPerson" aria-label="Show everyone">×</button></span>
+            <button type="button" id="fitBtn">Fit to view</button>
+          </div>
+          <div class="map" id="map">
+            <canvas id="canvas" role="img" aria-label="Map linking each idea title to the person who submitted it. The same ideas are listed below the map."></canvas>
+            <div class="empty" id="empty">
+              <h3 id="emptyTitle">Loading ideas…</h3>
+              <p id="emptyText">Ideas appear here as title cards, each linked to the person who added it.</p>
+            </div>
+            <aside class="detail" id="detail" hidden aria-live="polite">
+              <button type="button" class="close" id="closeDetail" aria-label="Close">×</button>
+              <h3 id="dTitle"></h3>
+              <div class="meta"><span id="dWho"></span><span>·</span><span id="dDate"></span></div>
+              <div class="sec"><h4>Current state</h4><p id="dState"></p></div>
+              <div class="sec"><h4>Gap</h4><p id="dGap"></p></div>
+              <div class="sec"><h4>What to do</h4><p id="dTodo"></p></div>
+            </aside>
+          </div>
+          <div class="legend"><span><i class="p"></i>Person</span><span><i class="i"></i>Idea</span></div>
+        </section>
+      </div>
+
+      <section aria-labelledby="listTitle" style="display:flex;flex-direction:column;gap:12px">
+        <div class="list-head"><h2 id="listTitle">All ideas</h2><small id="listNote">Newest first</small><button type="button" id="refreshBtn">Refresh</button></div>
+        <div class="cards" id="cards"></div>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* Paste the Google Apps Script web app URL here (ends in /exec). */
+const API_URL = "PASTE_WEB_APP_URL_HERE";
+
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},del(k){try{localStorage.removeItem(k);}catch(e){}}};
+const S={pass:store.get("zr-ideas-pass")||"",ideas:[],loaded:false,selected:null,person:null,q:""};
+
+function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600);}
+function notice(m,err){const n=$("notice");n.textContent=m||"";n.hidden=!m;n.classList.toggle("err",!!err);}
+const pkey=name=>"p:"+String(name||"").trim().toLowerCase().replace(/\s+/g," ");
+function fmtDate(iso){const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});}
+function matches(i){
+  if(S.person&&pkey(i.submitter)!==S.person) return false;
+  if(!S.q) return true;
+  return (i.title+" "+i.currentState+" "+i.gap+" "+i.whatToDo+" "+i.submitter).toLowerCase().includes(S.q);
+}
+
+/* ---------- API ---------- */
+async function api(method,payload){
+  if(!API_URL||API_URL.indexOf("PASTE")===0) throw {code:"not_configured"};
+  let res;
+  if(method==="GET"){
+    res=await fetch(API_URL+"?action=list&passcode="+encodeURIComponent(S.pass),{method:"GET"});
+  }else{
+    // text/plain avoids a CORS preflight, which Apps Script doesn't answer.
+    res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({passcode:S.pass},payload))});
+  }
+  if(!res.ok) throw {code:"http_"+res.status};
+  const data=await res.json();
+  if(!data.ok) throw {code:data.error||"error",fields:data.fields};
+  return data;
+}
+
+async function load(quiet){
+  try{
+    const data=await api("GET");
+    S.ideas=data.ideas||[];S.loaded=true;notice("");
+    showBoard();render();
+    return true;
+  }catch(err){
+    if(err.code==="passcode"){S.pass="";store.del("zr-ideas-pass");showGate("That passcode didn't work. Check it and try again.");return false;}
+    if(err.code==="not_configured"){notice("This board isn't connected to its Google Sheet yet. Paste the Apps Script web app URL into API_URL in index.html.",true);return false;}
+    if(!quiet) notice("Ideas couldn't be loaded. Check your connection and select Refresh.",true);
+    return false;
+  }
+}
+function showGate(msg){$("gate").hidden=false;$("board").hidden=true;$("gateMsg").textContent=msg||"";$("gateMsg").className="form-msg"+(msg?" err":"");$("gPass").focus();}
+function showBoard(){$("gate").hidden=true;$("board").hidden=false;Graph.resize();}
+
+$("gateForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const v=$("gPass").value.trim();if(!v){$("gateMsg").textContent="Enter the passcode.";$("gateMsg").className="form-msg err";return;}
+  const b=$("gateBtn");b.disabled=true;b.textContent="Checking…";
+  S.pass=v;
+  if(await load()){store.set("zr-ideas-pass",v);$("gPass").value="";}
+  b.disabled=false;b.textContent="Open the board";
+});
+
+/* ---------- render ---------- */
+function render(){
+  const people=new Set(S.ideas.map(i=>pkey(i.submitter)));
+  $("statIdeas").textContent=S.ideas.length;$("statPeople").textContent=people.size;
+  if(S.selected&&!S.ideas.some(i=>i.id===S.selected)) S.selected=null;
+  $("empty").hidden=S.ideas.length>0;
+  if(!S.ideas.length&&S.loaded){$("emptyTitle").textContent="No ideas yet";$("emptyText").textContent="Add the first idea with the form. It will appear here as a card linked to your name.";}
+  renderList();renderDetail();renderChip();Graph.rebuild();
+}
+function renderList(){
+  const box=$("cards");box.textContent="";
+  const shown=S.ideas.filter(matches);
+  $("listNote").textContent=(S.person||S.q)?shown.length+" of "+S.ideas.length+" shown":"Newest first";
+  if(!S.ideas.length){const p=document.createElement("p");p.style.cssText="margin:0;color:var(--muted)";p.textContent="Ideas will be listed here once someone submits one.";box.append(p);return;}
+  for(const i of shown){
+    const c=document.createElement("article");c.className="card"+(i.id===S.selected?" sel":"");c.tabIndex=0;
+    const h=document.createElement("h3");h.textContent=i.title;
+    const m=document.createElement("div");m.className="meta";
+    const a=document.createElement("span");a.textContent=i.submitter;
+    const dot=document.createElement("span");dot.textContent="·";
+    const d=document.createElement("span");d.textContent=fmtDate(i.createdAt);
+    m.append(a,dot,d);
+    const g=document.createElement("p");g.className="gap";g.textContent="Gap: "+i.gap;
+    c.append(h,m,g);
+    const open=()=>{select(i.id);$("map").scrollIntoView({block:"center"});};
+    c.addEventListener("click",open);
+    c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
+    box.append(c);
+  }
+}
+function select(id){S.selected=id;renderDetail();renderList();Graph.focusOn(id);Graph.draw();}
+function renderDetail(){
+  const i=S.ideas.find(x=>x.id===S.selected);const d=$("detail");
+  if(!i){d.hidden=true;return;}
+  d.hidden=false;
+  $("dTitle").textContent=i.title;$("dWho").textContent=i.submitter;$("dDate").textContent=fmtDate(i.createdAt);
+  $("dState").textContent=i.currentState;$("dGap").textContent=i.gap;$("dTodo").textContent=i.whatToDo;
+}
+function renderChip(){
+  const c=$("personChip");if(!S.person){c.hidden=true;return;}
+  const i=S.ideas.find(x=>pkey(x.submitter)===S.person);
+  c.hidden=false;$("personChipName").textContent="Ideas by "+(i?i.submitter:"");
+}
+$("closeDetail").onclick=()=>{S.selected=null;renderDetail();renderList();Graph.draw();};
+$("clearPerson").onclick=()=>{S.person=null;renderChip();renderList();Graph.draw();};
+$("search").addEventListener("input",e=>{S.q=e.target.value.trim().toLowerCase();renderList();Graph.draw();});
+$("fitBtn").onclick=()=>Graph.fit();
+$("refreshBtn").onclick=async()=>{const b=$("refreshBtn");b.disabled=true;if(await load()) toast("Board refreshed");b.disabled=false;};
+
+/* ---------- submit ---------- */
+$("fName").value=store.get("zr-ideas-name")||"";
+$("ideaForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=$("formMsg");msg.className="form-msg";msg.textContent="";
+  const idea={submitter:$("fName").value.trim(),title:$("fTitle").value.trim(),currentState:$("fState").value.trim(),gap:$("fGap").value.trim(),whatToDo:$("fTodo").value.trim()};
+  const labels={submitter:"Your name",title:"Short title",currentState:"Current state",gap:"Gap",whatToDo:"What to do"};
+  const missing=Object.keys(labels).filter(k=>!idea[k]).map(k=>labels[k]);
+  if(missing.length){msg.classList.add("err");msg.textContent="Fill in: "+missing.join(", ")+".";return;}
+  const b=$("submitBtn");b.disabled=true;b.textContent="Adding…";
+  try{
+    const data=await api("POST",{idea});
+    store.set("zr-ideas-name",idea.submitter);
+    S.ideas.unshift(data.idea);S.selected=data.idea.id;
+    ["fTitle","fState","fGap","fTodo"].forEach(id=>$(id).value="");
+    msg.textContent="Idea added to the board.";toast("Idea added");
+    render();
+  }catch(err){
+    msg.classList.add("err");
+    if(err.code==="passcode"){S.pass="";store.del("zr-ideas-pass");showGate("The passcode has changed. Enter the new one to continue. Your idea is still in the form.");}
+    else if(err.code==="missing"){msg.textContent="Some fields were empty. Fill in every field and try again.";}
+    else{msg.textContent="The idea wasn't saved. Check your connection and select Add idea again.";}
+  }finally{b.disabled=false;b.textContent="Add idea";}
+});
+
+/* ---------- graph ---------- */
+const Graph=(function(){
+  const cv=$("canvas"),ctx=cv.getContext("2d"),mapEl=$("map");
+  const nodes=new Map();let edges=[],drag=null;
+  let view={x:0,y:0,k:1},W=0,H=0,dpr=1,alpha=0,raf=0,colors={},fitted=false;
+  const reduced=matchMedia("(prefers-reduced-motion: reduce)");
+  function readColors(){const cs=getComputedStyle(document.documentElement);for(const k of ["fg","surface","bg","brand","sky","idea","idea-ink","edge"]) colors[k]=cs.getPropertyValue("--"+k).trim();}
+  function bodyFont(){return getComputedStyle(document.body).fontFamily;}
+  function resize(){const r=cv.getBoundingClientRect();if(!r.width) return;dpr=window.devicePixelRatio||1;W=r.width;H=r.height;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);if(!fitted){view.x=W/2;view.y=H/2;}draw();}
+  const short=t=>t.length>34?t.slice(0,32).trimEnd()+"…":t;
+  function pillWidth(t){ctx.save();ctx.font="600 13px "+bodyFont();const w=ctx.measureText(short(t)).width;ctx.restore();return Math.max(70,w+24);}
+  function hue(s){let h=0;for(const ch of s) h=(h*31+ch.charCodeAt(0))%360;return h;}
+
+  function rebuild(){
+    const keep=new Set();
+    for(const i of S.ideas){
+      const pk=pkey(i.submitter);
+      if(!nodes.has(pk)){const a=Math.random()*Math.PI*2;nodes.set(pk,{id:pk,type:"p",x:Math.cos(a)*160,y:Math.sin(a)*160,vx:0,vy:0});}
+      nodes.get(pk).label=i.submitter;keep.add(pk);
+      const ik="i:"+i.id;
+      if(!nodes.has(ik)){const p=nodes.get(pk),a=Math.random()*Math.PI*2;nodes.set(ik,{id:ik,type:"i",ref:i.id,x:p.x+Math.cos(a)*110,y:p.y+Math.sin(a)*110,vx:0,vy:0});}
+      nodes.get(ik).label=i.title;keep.add(ik);
+    }
+    for(const k of [...nodes.keys()]) if(!keep.has(k)) nodes.delete(k);
+    edges=S.ideas.map(i=>[pkey(i.submitter),"i:"+i.id]);
+    for(const n of nodes.values()){n.w=n.type==="i"?pillWidth(n.label):40;n.h=n.type==="i"?30:40;}
+    heat(1);
+  }
+  function heat(a){alpha=Math.max(alpha,a);
+    if(reduced.matches){for(let i=0;i<300&&alpha>0.01;i++) tick();if(!fitted&&nodes.size) fit(true);draw();return;}
+    if(!raf) raf=requestAnimationFrame(loop);}
+  function loop(){raf=0;tick();if(!fitted&&nodes.size&&alpha<0.3) fit(true);draw();if(alpha>0.01||drag) raf=requestAnimationFrame(loop);}
+  function tick(){
+    const arr=[...nodes.values()];
+    for(let i=0;i<arr.length;i++){const a=arr[i];
+      for(let j=i+1;j<arr.length;j++){const b=arr[j];let dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy;if(d2<1){dx=Math.random()-.5;dy=Math.random()-.5;d2=1;}
+        const minD=(a.w+b.w)/2+20,f=(4200*alpha)/d2+(d2<minD*minD?0.6*alpha:0),d=Math.sqrt(d2),fx=dx/d*f,fy=dy/d*f;
+        a.vx-=fx;a.vy-=fy;b.vx+=fx;b.vy+=fy;}}
+    for(const [s,t] of edges){const a=nodes.get(s),b=nodes.get(t);if(!a||!b) continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+      const f=(d-(60+b.w/2))*0.05*alpha,fx=dx/d*f,fy=dy/d*f;a.vx+=fx*.5;a.vy+=fy*.5;b.vx-=fx;b.vy-=fy;}
+    for(const n of arr){n.vx-=n.x*0.012*alpha;n.vy-=n.y*0.012*alpha;
+      if(drag&&drag.node===n){n.vx=0;n.vy=0;continue;}
+      n.vx*=0.6;n.vy*=0.6;n.x+=n.vx;n.y+=n.vy;}
+    alpha*=0.975;
+  }
+  function dimmed(n){
+    if(!S.person&&!S.q) return false;
+    if(n.type==="i"){const i=S.ideas.find(x=>x.id===n.ref);return !i||!matches(i);}
+    return !S.ideas.some(i=>pkey(i.submitter)===n.id&&matches(i));
+  }
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function draw(){
+    if(!W) return;readColors();
+    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.setTransform(dpr*view.k,0,0,dpr*view.k,dpr*view.x,dpr*view.y);
+    for(const [s,t] of edges){const a=nodes.get(s),b=nodes.get(t);if(!a||!b) continue;
+      const hi=S.selected&&b.ref===S.selected;
+      ctx.globalAlpha=dimmed(b)?0.15:(hi?1:0.8);ctx.strokeStyle=hi?colors.brand:colors.edge;ctx.lineWidth=(hi?2.4:1.4)/Math.max(view.k,.6);
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    ctx.textAlign="center";ctx.textBaseline="middle";const font=bodyFont();
+    for(const n of nodes.values()){
+      const dim=dimmed(n);ctx.globalAlpha=dim?0.2:1;
+      if(n.type==="i"){
+        const sel=n.ref===S.selected;
+        rr(n.x-n.w/2,n.y-n.h/2,n.w,n.h,7);ctx.fillStyle=colors.idea;ctx.fill();
+        ctx.lineWidth=sel?2.6:1;ctx.strokeStyle=sel?colors.brand:colors.edge;ctx.stroke();
+        ctx.fillStyle=colors["idea-ink"];ctx.font="600 13px "+font;ctx.fillText(short(n.label),n.x,n.y+0.5);
+      }else{
+        const focus=S.person===n.id;
+        ctx.beginPath();ctx.arc(n.x,n.y,20,0,Math.PI*2);ctx.fillStyle="hsl("+hue(n.id)+" 45% 45%)";ctx.fill();
+        ctx.lineWidth=focus?3:1.5;ctx.strokeStyle=focus?colors.brand:colors.surface;ctx.stroke();
+        const ini=(n.label||"?").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+        ctx.fillStyle="#fff";ctx.font="700 13px "+font;ctx.fillText(ini||"?",n.x,n.y+0.5);
+        ctx.font="600 13px "+font;const tw=ctx.measureText(n.label).width;
+        ctx.fillStyle=colors.bg;ctx.globalAlpha=(dim?0.2:1)*0.85;rr(n.x-tw/2-5,n.y+25,tw+10,18,4);ctx.fill();ctx.globalAlpha=dim?0.2:1;
+        ctx.fillStyle=colors.fg;ctx.fillText(n.label,n.x,n.y+34.5);
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+  function fit(silent){
+    if(!nodes.size||!W) return;let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    for(const n of nodes.values()){x0=Math.min(x0,n.x-n.w/2);x1=Math.max(x1,n.x+n.w/2);y0=Math.min(y0,n.y-n.h/2);y1=Math.max(y1,n.y+n.h/2+24);}
+    const pad=40,k=Math.min(1.4,Math.max(0.3,Math.min((W-pad*2)/(x1-x0||1),(H-pad*2)/(y1-y0||1))));
+    view.k=k;view.x=W/2-(x0+x1)/2*k;view.y=H/2-(y0+y1)/2*k;fitted=true;if(!silent) draw();
+  }
+  function focusOn(id){const n=nodes.get("i:"+id);if(!n||!W) return;const sx=n.x*view.k+view.x,sy=n.y*view.k+view.y;
+    if(sx<40||sx>W-40||sy<40||sy>H-40){view.x=W/2-n.x*view.k;view.y=H/2-n.y*view.k;}}
+  const toWorld=(px,py)=>({x:(px-view.x)/view.k,y:(py-view.y)/view.k});
+  function hit(px,py){const p=toWorld(px,py);let f=null;
+    for(const n of nodes.values()){
+      if(n.type==="i"){if(Math.abs(p.x-n.x)<=n.w/2&&Math.abs(p.y-n.y)<=n.h/2) f=n;}
+      else if((p.x-n.x)**2+(p.y-n.y)**2<=22*22) f=n;}
+    return f;}
+  function pos(e){const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+  cv.addEventListener("pointerdown",e=>{const [px,py]=pos(e);drag={node:hit(px,py),sx:px,sy:py,vx:view.x,vy:view.y,moved:false};cv.setPointerCapture(e.pointerId);cv.classList.add("dragging");});
+  cv.addEventListener("pointermove",e=>{if(!drag) return;const [px,py]=pos(e);
+    if(Math.abs(px-drag.sx)+Math.abs(py-drag.sy)>4) drag.moved=true;if(!drag.moved) return;
+    if(drag.node){const w=toWorld(px,py);drag.node.x=w.x;drag.node.y=w.y;heat(0.3);}
+    else{view.x=drag.vx+(px-drag.sx);view.y=drag.vy+(py-drag.sy);draw();}});
+  function end(){if(!drag) return;const d=drag;drag=null;cv.classList.remove("dragging");
+    if(d.moved) return;
+    if(d.node&&d.node.type==="i") select(d.node.ref);
+    else if(d.node){S.person=S.person===d.node.id?null:d.node.id;renderChip();renderList();draw();}
+    else{S.selected=null;renderDetail();renderList();draw();}}
+  cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
+  cv.addEventListener("wheel",e=>{e.preventDefault();const [px,py]=pos(e);
+    const k=Math.min(3,Math.max(0.25,view.k*Math.exp(-e.deltaY*0.0015))),w=toWorld(px,py);view.k=k;view.x=px-w.x*k;view.y=py-w.y*k;draw();},{passive:false});
+  new ResizeObserver(resize).observe(mapEl);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{for(const n of nodes.values()) if(n.type==="i") n.w=pillWidth(n.label);draw();});
+  return {rebuild,draw,fit,focusOn,resize};
+})();
+
+/* ---------- start ---------- */
+if(S.pass){load().then(ok=>{if(!ok&&$("board").hidden&&$("gate").hidden&&!$("notice").textContent) showGate();});}
+else if(!API_URL||API_URL.indexOf("PASTE")===0){notice("This board isn't connected to its Google Sheet yet. Paste the Apps Script web app URL into API_URL in index.html.",true);}
+else showGate();
+setInterval(()=>{if(S.pass&&!$("board").hidden&&document.visibilityState==="visible") load(true);},60000);
+})();
+</script>
+</body>
+</html>
