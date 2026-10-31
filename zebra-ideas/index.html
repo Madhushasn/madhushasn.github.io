@@ -111,7 +111,7 @@ canvas.dragging{cursor:grabbing}
 .rank-score{grid-row:span 2;text-align:right;font-variant-numeric:tabular-nums}
 .rank-score b{display:block;font-family:var(--f-display);font-size:20px;line-height:1.1}
 .rank-score span{font-size:12px;color:var(--muted)}
-.rank-sub{display:flex;align-items:center;gap:10px;min-width:0;font-size:13px;color:var(--muted);font-weight:400}
+.rank-sub{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-width:0;font-size:13px;color:var(--muted);font-weight:400}
 .bar{flex:1 1 auto;max-width:220px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--brand);border-radius:3px}
 .rate-panel{padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:12px}
@@ -135,6 +135,12 @@ fieldset.scores legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6p
 .score-row input:checked + span{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
 .score-row input:focus-visible + span{outline:2px solid var(--brand);outline-offset:2px}
 .score-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.crit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.crit div{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--bg)}
+.crit b{display:block;font-family:var(--f-display);font-size:18px;font-variant-numeric:tabular-nums}
+.crit span{font-size:12px;color:var(--muted)}
+.rank-crit{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill.lite{background:var(--surface-2);color:var(--fg);font-weight:600}
 .comments h4{margin:0 0 6px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand)}
 .comments ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .comments li{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
@@ -235,7 +241,7 @@ fieldset.scores legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6p
       <div class="view" id="viewRate" role="tabpanel" aria-labelledby="tabRate" hidden>
         <div class="rate-intro">
           <h2>Rate &amp; Prioritize</h2>
-          <p>Ideas are ranked by their average score out of 10. Select an idea to read it, comment and give your score. Rating the same idea again under your name updates your score.</p>
+          <p>Score each idea from 1 to 10 on impact, cost and practicality. Ideas are ranked by the average of all three. For cost, 10 means low cost. Rating the same idea again under your name updates your scores.</p>
         </div>
         <div class="rate-grid">
           <div class="rank-col">
@@ -247,7 +253,7 @@ fieldset.scores legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6p
           <section class="panel rate-panel" id="ratePanel" aria-label="Selected idea">
             <div class="rate-empty" id="rateEmpty">
               <h3>Select an idea to rate it</h3>
-              <p>Pick a tile from the list to read the idea, see the team's comments and add your score.</p>
+              <p>Pick a tile from the list to read the idea, see the team's comments and add your scores.</p>
             </div>
             <div id="rateBody" hidden style="display:flex;flex-direction:column;gap:12px">
               <h3 id="rTitle"></h3>
@@ -261,14 +267,10 @@ fieldset.scores legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6p
               </details>
               <form id="rateForm" novalidate>
                 <label for="rName">Your name<input id="rName" maxlength="80" autocomplete="name" required></label>
-                <fieldset class="scores">
-                  <legend>Your score out of 10</legend>
-                  <div class="score-row" id="scoreRow"></div>
-                  <div class="score-ends"><span>1 = low priority</span><span>10 = do this first</span></div>
-                </fieldset>
-                <label for="rComment">Comment <span class="hint">Optional. Why this score? What would make it stronger?</span>
+                <div id="scoreGroups" style="display:flex;flex-direction:column;gap:14px"></div>
+                <label for="rComment">Comment <span class="hint">Optional. Why these scores? What would make it stronger?</span>
                   <textarea id="rComment" maxlength="1500"></textarea></label>
-                <button class="primary" type="submit" id="rateBtn">Submit rating</button>
+                <button class="primary" type="submit" id="rateBtn">Submit scores</button>
                 <p class="form-msg" id="rateMsg" role="status"></p>
               </form>
               <div class="comments">
@@ -298,11 +300,19 @@ function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout
 function notice(m,err){const n=$("notice");n.textContent=m||"";n.hidden=!m;n.classList.toggle("err",!!err);}
 const pkey=name=>"p:"+String(name||"").trim().toLowerCase().replace(/\s+/g," ");
 function fmtDate(iso){const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});}
+const CRITERIA=[
+  {key:"impact",label:"Impact",low:"1 = little impact",high:"10 = big impact",short:"Impact"},
+  {key:"cost",label:"Cost",low:"1 = very expensive",high:"10 = low cost",short:"Cost"},
+  {key:"practicality",label:"Practicality",low:"1 = hard to do",high:"10 = easy to do",short:"Practicality"}
+];
 const rkey=n=>String(n||"").trim().toLowerCase().replace(/\s+/g," ");
+const overallOf=r=>(Number(r.impact)+Number(r.cost)+Number(r.practicality))/3;
 function statsFor(id){
   const list=S.ratings.filter(r=>r.ideaId===id);
-  const avg=list.length?list.reduce((a,r)=>a+Number(r.score),0)/list.length:null;
-  return {avg,n:list.length,list};
+  const n=list.length;
+  const mean=f=>n?list.reduce((a,r)=>a+f(r),0)/n:null;
+  const crit={};CRITERIA.forEach(c=>crit[c.key]=mean(r=>Number(r[c.key])));
+  return {avg:mean(overallOf),crit,n,list};
 }
 const fmtAvg=v=>v==null?"":(Math.round(v*10)/10).toFixed(1);
 function matches(i){
@@ -330,7 +340,7 @@ async function api(method,payload){
 async function load(quiet){
   try{
     const data=await api("GET");
-    S.ideas=data.ideas||[];S.ratings=(data.ratings||[]).filter(r=>r.score>=1&&r.score<=10);S.loaded=true;notice("");
+    S.ideas=data.ideas||[];S.ratings=(data.ratings||[]).filter(r=>CRITERIA.every(c=>Number(r[c.key])>=1&&Number(r[c.key])<=10));S.loaded=true;notice("");
     showBoard();render();
     return true;
   }catch(err){
@@ -450,12 +460,20 @@ document.querySelector(".tabs").addEventListener("keydown",e=>{
 
 /* ---------- rate & prioritize ---------- */
 (function(){
-  const row=$("scoreRow");
-  for(let n=1;n<=10;n++){
-    const l=document.createElement("label");
-    const inp=document.createElement("input");inp.type="radio";inp.name="score";inp.value=String(n);inp.id="score"+n;inp.setAttribute("aria-label",n+" out of 10");
-    const sp=document.createElement("span");sp.textContent=n;
-    l.append(inp,sp);row.append(l);
+  const box=$("scoreGroups");
+  for(const c of CRITERIA){
+    const fs=document.createElement("fieldset");fs.className="scores";
+    const lg=document.createElement("legend");lg.textContent=c.label+" (out of 10)";
+    const row=document.createElement("div");row.className="score-row";
+    for(let n=1;n<=10;n++){
+      const l=document.createElement("label");
+      const inp=document.createElement("input");inp.type="radio";inp.name=c.key;inp.value=String(n);inp.id=c.key+n;inp.setAttribute("aria-label",c.label+" "+n+" out of 10");
+      const sp=document.createElement("span");sp.textContent=n;
+      l.append(inp,sp);row.append(l);
+    }
+    const ends=document.createElement("div");ends.className="score-ends";
+    const a=document.createElement("span");a.textContent=c.low;const b=document.createElement("span");b.textContent=c.high;ends.append(a,b);
+    fs.append(lg,row,ends);box.append(fs);
   }
 })();
 $("rName").value=store.get("zr-ideas-name")||"";
@@ -479,11 +497,12 @@ function tile(x,rankNo){
   const sub=document.createElement("span");sub.className="rank-sub";
   const by=document.createElement("span");by.textContent=x.idea.submitter;
   sub.append(by);
-  if(x.n){const bar=document.createElement("span");bar.className="bar";const fill=document.createElement("i");fill.style.width=(x.avg*10)+"%";bar.append(fill);sub.append(bar);}
+  if(x.n){const bar=document.createElement("span");bar.className="bar";const fill=document.createElement("i");fill.style.width=(x.avg*10)+"%";bar.append(fill);sub.append(bar);
+    const cr=document.createElement("span");cr.className="rank-crit";cr.textContent=CRITERIA.map(c=>c.short+" "+fmtAvg(x.crit[c.key])).join(" · ");sub.append(cr);}
   b.append(no,t,sc,sub);
   b.addEventListener("click",()=>{S.rateSel=x.idea.id;renderRate();
     if(matchMedia("(max-width:900px)").matches) $("ratePanel").scrollIntoView({block:"start"});
-    else $("rName").value?$("score1").focus({preventScroll:true}):$("rName").focus({preventScroll:true});});
+    else $("rName").value?$("impact1").focus({preventScroll:true}):$("rName").focus({preventScroll:true});});
   li.append(b);return li;
 }
 function renderRate(){
@@ -506,7 +525,13 @@ function renderRatePanel(){
   $("rTitle").textContent=i.title;$("rWho").textContent=i.submitter;$("rDate").textContent=fmtDate(i.createdAt);
   $("rState").textContent=i.currentState;$("rGap").textContent=i.gap;$("rTodo").textContent=i.whatToDo;
   const sum=$("rSummary");sum.textContent="";
-  if(st.n){const b=document.createElement("b");b.textContent=fmtAvg(st.avg);const s=document.createElement("span");s.textContent="average out of 10 from "+st.n+(st.n===1?" rating":" ratings");sum.append(b,s);}
+  const old=sum.nextElementSibling;if(old&&old.classList.contains("crit")) old.remove();
+  if(st.n){
+    const b=document.createElement("b");b.textContent=fmtAvg(st.avg);const s=document.createElement("span");s.textContent="overall out of 10 from "+st.n+(st.n===1?" rating":" ratings");sum.append(b,s);
+    const cg=document.createElement("div");cg.className="crit";
+    for(const c of CRITERIA){const d=document.createElement("div");const v=document.createElement("b");v.textContent=fmtAvg(st.crit[c.key]);const l=document.createElement("span");l.textContent=c.label+(c.key==="cost"?" (10 = low cost)":"");d.append(v,l);cg.append(d);}
+    sum.after(cg);
+  }
   else{const s=document.createElement("span");s.textContent="No ratings yet. Be the first to score this idea.";sum.append(s);}
   const list=st.list.slice().sort((a,b)=>(a.updatedAt||a.createdAt)<(b.updatedAt||b.createdAt)?1:-1);
   $("rCountHead").textContent="Team comments ("+list.length+")";
@@ -516,9 +541,11 @@ function renderRatePanel(){
     const li=document.createElement("li");
     const h=document.createElement("div");h.className="c-head";
     const n=document.createElement("b");n.textContent=r.rater;
-    const pill=document.createElement("span");pill.className="pill";pill.textContent=r.score+" / 10";
+    const pill=document.createElement("span");pill.className="pill";pill.textContent=fmtAvg(overallOf(r))+" / 10";
     const d=document.createElement("span");d.textContent=fmtDate(r.updatedAt||r.createdAt);
-    h.append(n,pill,d);li.append(h);
+    h.append(n,pill,d);
+    for(const c of CRITERIA){const p2=document.createElement("span");p2.className="pill lite";p2.textContent=c.short+" "+r[c.key];h.insertBefore(p2,d);}
+    li.append(h);
     if(r.comment){const p=document.createElement("p");p.textContent=r.comment;li.append(p);}
     ul.append(li);
   }
@@ -531,9 +558,9 @@ function myRating(){
 }
 function prefillMine(){
   const mine=myRating();
-  document.querySelectorAll('input[name="score"]').forEach(x=>x.checked=!!mine&&Number(x.value)===Number(mine.score));
+  for(const c of CRITERIA) document.querySelectorAll('input[name="'+c.key+'"]').forEach(x=>x.checked=!!mine&&Number(x.value)===Number(mine[c.key]));
   $("rComment").value=mine?mine.comment:"";
-  $("rateBtn").textContent=mine?"Update my rating":"Submit rating";
+  $("rateBtn").textContent=mine?"Update my scores":"Submit scores";
 }
 $("rName").addEventListener("change",prefillMine);
 
@@ -541,26 +568,26 @@ $("rateForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const msg=$("rateMsg");msg.className="form-msg";msg.textContent="";
   const rater=$("rName").value.trim().replace(/\s+/g," ");
-  const picked=document.querySelector('input[name="score"]:checked');
-  const missing=[];if(!rater) missing.push("Your name");if(!picked) missing.push("a score");
-  if(missing.length){msg.classList.add("err");msg.textContent="Add "+missing.join(" and ")+".";return;}
+  const marks={};const missing=[];if(!rater) missing.push("your name");
+  for(const c of CRITERIA){const pk=document.querySelector('input[name="'+c.key+'"]:checked');if(pk) marks[c.key]=Number(pk.value);else missing.push(c.label.toLowerCase()+" score");}
+  if(missing.length){msg.classList.add("err");msg.textContent="Add "+missing.join(", ")+".";return;}
   const b=$("rateBtn");const label=b.textContent;b.disabled=true;b.textContent="Saving…";
   try{
-    const data=await api("POST",{action:"rate",rating:{ideaId:S.rateSel,rater,score:Number(picked.value),comment:$("rComment").value.trim()}});
+    const data=await api("POST",{action:"rate",rating:Object.assign({ideaId:S.rateSel,rater,comment:$("rComment").value.trim()},marks)});
     store.set("zr-ideas-name",rater);if(!$("fName").value) $("fName").value=rater;
-    const r=data.rating;r.score=Number(r.score);
+    const r=data.rating;CRITERIA.forEach(c=>r[c.key]=Number(r[c.key]));
     S.ratings=S.ratings.filter(x=>x.id!==r.id&&!(x.ideaId===r.ideaId&&rkey(x.rater)===rkey(r.rater)));
     S.ratings.push(r);
     render();
-    msg.textContent=data.updated?"Your rating was updated.":"Thanks, your rating was added.";
-    toast(data.updated?"Rating updated":"Rating added");
-    $("rateBtn").textContent="Update my rating";
+    msg.textContent=data.updated?"Your scores were updated.":"Thanks, your scores were added.";
+    toast(data.updated?"Scores updated":"Scores added");
+    $("rateBtn").textContent="Update my scores";
   }catch(err){
     msg.classList.add("err");b.textContent=label;
     if(err.code==="passcode"){S.pass="";store.del("zr-ideas-pass");showGate("The passcode has changed. Enter the new one to continue.");}
     else if(err.code==="no_idea"){msg.textContent="This idea was removed from the board. Refresh to see the current list.";}
-    else if(err.code==="missing"){msg.textContent="Add your name and pick a score from 1 to 10.";}
-    else msg.textContent="The rating wasn't saved. Check your connection and try again.";
+    else if(err.code==="missing"){msg.textContent="Add your name and pick a score from 1 to 10 for impact, cost and practicality.";}
+    else msg.textContent="Your scores weren't saved. Check your connection and try again.";
   }finally{b.disabled=false;}
 });
 
