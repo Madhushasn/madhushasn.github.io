@@ -88,6 +88,61 @@ canvas.dragging{cursor:grabbing}
 .card.sel{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
 .card h3{font-size:16px;font-weight:600}
 .card .gap{margin:0;color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:10px 14px;color:var(--muted);font-family:var(--f-display);font-size:15px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--brand)}
+.view{display:flex;flex-direction:column;gap:24px}
+.avg{font-variant-numeric:tabular-nums;font-weight:600;color:var(--brand)}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* rate & prioritize */
+.rate-intro h2{font-size:20px}
+.rate-intro p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.rate-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:20px;align-items:start}
+@media (max-width:900px){.rate-grid{grid-template-columns:minmax(0,1fr)}}
+.rank-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.rank-col h3{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:var(--f-body);font-weight:600;margin-top:6px}
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rank-tile{width:100%;text-align:left;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.rank-tile:hover{border-color:var(--brand)}
+.rank-tile[aria-current="true"]{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.rank-no{grid-row:span 2;font-family:var(--f-display);font-size:20px;font-weight:700;color:var(--brand);text-align:center;font-variant-numeric:tabular-nums}
+.rank-title{font-weight:600;font-size:15px;min-width:0;overflow-wrap:anywhere}
+.rank-score{grid-row:span 2;text-align:right;font-variant-numeric:tabular-nums}
+.rank-score b{display:block;font-family:var(--f-display);font-size:20px;line-height:1.1}
+.rank-score span{font-size:12px;color:var(--muted)}
+.rank-sub{display:flex;align-items:center;gap:10px;min-width:0;font-size:13px;color:var(--muted);font-weight:400}
+.bar{flex:1 1 auto;max-width:220px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:3px}
+.rate-panel{padding:16px;display:flex;flex-direction:column;gap:12px;position:sticky;top:12px}
+@media (max-width:900px){.rate-panel{position:static}}
+.rate-empty{color:var(--muted);text-align:center;padding:24px 8px}
+.rate-empty h3{color:var(--fg);font-size:17px;margin-bottom:4px}
+.rate-panel h3{font-size:18px}
+.summary{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.summary b{font-family:var(--f-display);font-size:28px;color:var(--brand);font-variant-numeric:tabular-nums}
+.summary span{color:var(--muted)}
+details.full{border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+details.full summary{cursor:pointer;font-weight:600}
+details.full .sec{margin-top:8px}
+#rateForm{padding:0;border-top:1px solid var(--line);padding-top:12px}
+fieldset.scores{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+fieldset.scores legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6px}
+.score-row{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.score-row label{display:block;position:relative}
+.score-row input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.score-row span{display:block;text-align:center;padding:7px 0;border:1px solid var(--line);border-radius:6px;font-weight:600;font-variant-numeric:tabular-nums;background:var(--bg)}
+.score-row input:checked + span{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.score-row input:focus-visible + span{outline:2px solid var(--brand);outline-offset:2px}
+.score-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.comments h4{margin:0 0 6px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand)}
+.comments ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.comments li{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.c-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.c-head b{color:var(--fg)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--brand);color:var(--on-brand);font-weight:700;font-size:12px;font-variant-numeric:tabular-nums}
+.comments p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.comments .none{color:var(--muted);font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:600;z-index:20}
 </style>
 </head>
@@ -120,7 +175,12 @@ canvas.dragging{cursor:grabbing}
       </form>
     </section>
 
-    <div id="board" hidden style="display:flex;flex-direction:column;gap:24px">
+    <div id="board" hidden style="display:flex;flex-direction:column;gap:20px">
+      <div class="tabs" role="tablist" aria-label="Board views">
+        <button type="button" class="tab" role="tab" id="tabIdeas" aria-controls="viewIdeas" aria-selected="true">Ideas</button>
+        <button type="button" class="tab" role="tab" id="tabRate" aria-controls="viewRate" aria-selected="false">Rate &amp; Prioritize</button>
+      </div>
+      <div class="view" id="viewIdeas" role="tabpanel" aria-labelledby="tabIdeas">
       <div class="row">
         <section class="panel" aria-labelledby="formTitle">
           <div class="panel-head"><h2 id="formTitle">Submit an idea</h2></div>
@@ -159,6 +219,7 @@ canvas.dragging{cursor:grabbing}
               <div class="sec"><h4>Current state</h4><p id="dState"></p></div>
               <div class="sec"><h4>Gap</h4><p id="dGap"></p></div>
               <div class="sec"><h4>What to do</h4><p id="dTodo"></p></div>
+              <div class="detail-actions"><span class="avg" id="dAvg"></span><button type="button" id="dRate">Rate this idea</button></div>
             </aside>
           </div>
           <div class="legend"><span><i class="p"></i>Person</span><span><i class="i"></i>Idea</span></div>
@@ -169,6 +230,55 @@ canvas.dragging{cursor:grabbing}
         <div class="list-head"><h2 id="listTitle">All ideas</h2><small id="listNote">Newest first</small><button type="button" id="refreshBtn">Refresh</button></div>
         <div class="cards" id="cards"></div>
       </section>
+      </div>
+
+      <div class="view" id="viewRate" role="tabpanel" aria-labelledby="tabRate" hidden>
+        <div class="rate-intro">
+          <h2>Rate &amp; Prioritize</h2>
+          <p>Ideas are ranked by their average score out of 10. Select an idea to read it, comment and give your score. Rating the same idea again under your name updates your score.</p>
+        </div>
+        <div class="rate-grid">
+          <div class="rank-col">
+            <h3 id="rankedHead">Priority ranking</h3>
+            <ol class="rank" id="rankList" aria-labelledby="rankedHead"></ol>
+            <h3 id="unratedHead">Waiting for ratings</h3>
+            <ul class="rank" id="unratedList" aria-labelledby="unratedHead"></ul>
+          </div>
+          <section class="panel rate-panel" id="ratePanel" aria-label="Selected idea">
+            <div class="rate-empty" id="rateEmpty">
+              <h3>Select an idea to rate it</h3>
+              <p>Pick a tile from the list to read the idea, see the team's comments and add your score.</p>
+            </div>
+            <div id="rateBody" hidden style="display:flex;flex-direction:column;gap:12px">
+              <h3 id="rTitle"></h3>
+              <div class="meta"><span id="rWho"></span><span>·</span><span id="rDate"></span></div>
+              <div class="summary" id="rSummary"></div>
+              <details class="full">
+                <summary>Read the full idea</summary>
+                <div class="sec"><h4>Current state</h4><p id="rState"></p></div>
+                <div class="sec"><h4>Gap</h4><p id="rGap"></p></div>
+                <div class="sec"><h4>What to do</h4><p id="rTodo"></p></div>
+              </details>
+              <form id="rateForm" novalidate>
+                <label for="rName">Your name<input id="rName" maxlength="80" autocomplete="name" required></label>
+                <fieldset class="scores">
+                  <legend>Your score out of 10</legend>
+                  <div class="score-row" id="scoreRow"></div>
+                  <div class="score-ends"><span>1 = low priority</span><span>10 = do this first</span></div>
+                </fieldset>
+                <label for="rComment">Comment <span class="hint">Optional. Why this score? What would make it stronger?</span>
+                  <textarea id="rComment" maxlength="1500"></textarea></label>
+                <button class="primary" type="submit" id="rateBtn">Submit rating</button>
+                <p class="form-msg" id="rateMsg" role="status"></p>
+              </form>
+              <div class="comments">
+                <h4 id="rCountHead">Team comments</h4>
+                <ul id="rComments"></ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -182,12 +292,19 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwfoyyQOcRkuQtMnFcDDRHf
 "use strict";
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}},del(k){try{localStorage.removeItem(k);}catch(e){}}};
-const S={pass:store.get("zr-ideas-pass")||"",ideas:[],loaded:false,selected:null,person:null,q:""};
+const S={pass:store.get("zr-ideas-pass")||"",ideas:[],ratings:[],loaded:false,selected:null,person:null,q:"",view:"ideas",rateSel:null};
 
 function toast(m){const t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600);}
 function notice(m,err){const n=$("notice");n.textContent=m||"";n.hidden=!m;n.classList.toggle("err",!!err);}
 const pkey=name=>"p:"+String(name||"").trim().toLowerCase().replace(/\s+/g," ");
 function fmtDate(iso){const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});}
+const rkey=n=>String(n||"").trim().toLowerCase().replace(/\s+/g," ");
+function statsFor(id){
+  const list=S.ratings.filter(r=>r.ideaId===id);
+  const avg=list.length?list.reduce((a,r)=>a+Number(r.score),0)/list.length:null;
+  return {avg,n:list.length,list};
+}
+const fmtAvg=v=>v==null?"":(Math.round(v*10)/10).toFixed(1);
 function matches(i){
   if(S.person&&pkey(i.submitter)!==S.person) return false;
   if(!S.q) return true;
@@ -213,7 +330,7 @@ async function api(method,payload){
 async function load(quiet){
   try{
     const data=await api("GET");
-    S.ideas=data.ideas||[];S.loaded=true;notice("");
+    S.ideas=data.ideas||[];S.ratings=(data.ratings||[]).filter(r=>r.score>=1&&r.score<=10);S.loaded=true;notice("");
     showBoard();render();
     return true;
   }catch(err){
@@ -224,7 +341,7 @@ async function load(quiet){
   }
 }
 function showGate(msg){$("gate").hidden=false;$("board").hidden=true;$("gateMsg").textContent=msg||"";$("gateMsg").className="form-msg"+(msg?" err":"");$("gPass").focus();}
-function showBoard(){$("gate").hidden=true;$("board").hidden=false;Graph.resize();}
+function showBoard(){$("gate").hidden=true;$("board").hidden=false;setView(location.hash==="#rate"?"rate":S.view);}
 
 $("gateForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -242,7 +359,7 @@ function render(){
   if(S.selected&&!S.ideas.some(i=>i.id===S.selected)) S.selected=null;
   $("empty").hidden=S.ideas.length>0;
   if(!S.ideas.length&&S.loaded){$("emptyTitle").textContent="No ideas yet";$("emptyText").textContent="Add the first idea with the form. It will appear here as a card linked to your name.";}
-  renderList();renderDetail();renderChip();Graph.rebuild();
+  renderList();renderDetail();renderChip();renderRate();Graph.rebuild();
 }
 function renderList(){
   const box=$("cards");box.textContent="";
@@ -257,6 +374,8 @@ function renderList(){
     const dot=document.createElement("span");dot.textContent="·";
     const d=document.createElement("span");d.textContent=fmtDate(i.createdAt);
     m.append(a,dot,d);
+    const st=statsFor(i.id);
+    if(st.n){const dot2=document.createElement("span");dot2.textContent="·";const av=document.createElement("span");av.className="avg";av.textContent="Avg "+fmtAvg(st.avg)+" / 10 ("+st.n+")";m.append(dot2,av);}
     const g=document.createElement("p");g.className="gap";g.textContent="Gap: "+i.gap;
     c.append(h,m,g);
     const open=()=>{select(i.id);$("map").scrollIntoView({block:"center"});};
@@ -272,7 +391,10 @@ function renderDetail(){
   d.hidden=false;
   $("dTitle").textContent=i.title;$("dWho").textContent=i.submitter;$("dDate").textContent=fmtDate(i.createdAt);
   $("dState").textContent=i.currentState;$("dGap").textContent=i.gap;$("dTodo").textContent=i.whatToDo;
+  const st=statsFor(i.id);
+  $("dAvg").textContent=st.n?"Average "+fmtAvg(st.avg)+" / 10 from "+st.n+(st.n===1?" rating":" ratings"):"Not rated yet";
 }
+$("dRate").onclick=()=>{S.rateSel=S.selected;setView("rate");renderRate();};
 function renderChip(){
   const c=$("personChip");if(!S.person){c.hidden=true;return;}
   const i=S.ideas.find(x=>pkey(x.submitter)===S.person);
@@ -307,6 +429,139 @@ $("ideaForm").addEventListener("submit",async e=>{
     else if(err.code==="missing"){msg.textContent="Some fields were empty. Fill in every field and try again.";}
     else{msg.textContent="The idea wasn't saved. Check your connection and select Add idea again.";}
   }finally{b.disabled=false;b.textContent="Add idea";}
+});
+
+/* ---------- tabs ---------- */
+function setView(v){
+  S.view=v==="rate"?"rate":"ideas";
+  $("viewIdeas").hidden=S.view!=="ideas";$("viewRate").hidden=S.view!=="rate";
+  $("tabIdeas").setAttribute("aria-selected",S.view==="ideas");$("tabRate").setAttribute("aria-selected",S.view==="rate");
+  const h=S.view==="rate"?"#rate":"#ideas";
+  if(location.hash!==h){try{history.replaceState(null,"",h);}catch(e){}}
+  if(S.view==="ideas") Graph.resize();
+}
+$("tabIdeas").onclick=()=>setView("ideas");
+$("tabRate").onclick=()=>{setView("rate");renderRate();};
+window.addEventListener("hashchange",()=>{setView(location.hash==="#rate"?"rate":"ideas");renderRate();});
+document.querySelector(".tabs").addEventListener("keydown",e=>{
+  if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft") return;
+  const next=S.view==="ideas"?"rate":"ideas";setView(next);renderRate();$(next==="rate"?"tabRate":"tabIdeas").focus();
+});
+
+/* ---------- rate & prioritize ---------- */
+(function(){
+  const row=$("scoreRow");
+  for(let n=1;n<=10;n++){
+    const l=document.createElement("label");
+    const inp=document.createElement("input");inp.type="radio";inp.name="score";inp.value=String(n);inp.id="score"+n;inp.setAttribute("aria-label",n+" out of 10");
+    const sp=document.createElement("span");sp.textContent=n;
+    l.append(inp,sp);row.append(l);
+  }
+})();
+$("rName").value=store.get("zr-ideas-name")||"";
+
+function ranked(){
+  const withStats=S.ideas.map(i=>Object.assign({idea:i},statsFor(i.id)));
+  const rated=withStats.filter(x=>x.n).sort((a,b)=>(b.avg-a.avg)||(b.n-a.n)||(a.idea.createdAt<b.idea.createdAt?1:-1));
+  const unrated=withStats.filter(x=>!x.n);
+  return {rated,unrated};
+}
+function tile(x,rankNo){
+  const li=document.createElement("li");
+  const b=document.createElement("button");b.type="button";b.className="rank-tile";
+  if(x.idea.id===S.rateSel) b.setAttribute("aria-current","true");
+  const no=document.createElement("span");no.className="rank-no";no.textContent=rankNo==null?"–":rankNo;
+  const t=document.createElement("span");t.className="rank-title";t.textContent=x.idea.title;
+  const sc=document.createElement("span");sc.className="rank-score";
+  const big=document.createElement("b");big.textContent=x.n?fmtAvg(x.avg):"–";
+  const small=document.createElement("span");small.textContent=x.n?"avg of "+x.n:"no ratings";
+  sc.append(big,small);
+  const sub=document.createElement("span");sub.className="rank-sub";
+  const by=document.createElement("span");by.textContent=x.idea.submitter;
+  sub.append(by);
+  if(x.n){const bar=document.createElement("span");bar.className="bar";const fill=document.createElement("i");fill.style.width=(x.avg*10)+"%";bar.append(fill);sub.append(bar);}
+  b.append(no,t,sc,sub);
+  b.addEventListener("click",()=>{S.rateSel=x.idea.id;renderRate();
+    if(matchMedia("(max-width:900px)").matches) $("ratePanel").scrollIntoView({block:"start"});
+    else $("rName").value?$("score1").focus({preventScroll:true}):$("rName").focus({preventScroll:true});});
+  li.append(b);return li;
+}
+function renderRate(){
+  const {rated,unrated}=ranked();
+  const rl=$("rankList"),ul=$("unratedList");rl.textContent="";ul.textContent="";
+  rated.forEach((x,k)=>rl.append(tile(x,k+1)));
+  unrated.forEach(x=>ul.append(tile(x,null)));
+  $("rankedHead").hidden=!rated.length;rl.hidden=!rated.length;
+  $("unratedHead").hidden=!unrated.length;ul.hidden=!unrated.length;
+  if(!S.ideas.length){const p=document.createElement("li");p.className="rate-empty";p.textContent="No ideas yet. Add one on the Ideas tab.";rl.hidden=false;rl.append(p);}
+  if(S.rateSel&&!S.ideas.some(i=>i.id===S.rateSel)) S.rateSel=null;
+  renderRatePanel();
+}
+let lastPanelIdea=null;
+function renderRatePanel(){
+  const i=S.ideas.find(x=>x.id===S.rateSel);
+  $("rateEmpty").hidden=!!i;$("rateBody").hidden=!i;
+  if(!i) return;
+  const st=statsFor(i.id);
+  $("rTitle").textContent=i.title;$("rWho").textContent=i.submitter;$("rDate").textContent=fmtDate(i.createdAt);
+  $("rState").textContent=i.currentState;$("rGap").textContent=i.gap;$("rTodo").textContent=i.whatToDo;
+  const sum=$("rSummary");sum.textContent="";
+  if(st.n){const b=document.createElement("b");b.textContent=fmtAvg(st.avg);const s=document.createElement("span");s.textContent="average out of 10 from "+st.n+(st.n===1?" rating":" ratings");sum.append(b,s);}
+  else{const s=document.createElement("span");s.textContent="No ratings yet. Be the first to score this idea.";sum.append(s);}
+  const list=st.list.slice().sort((a,b)=>(a.updatedAt||a.createdAt)<(b.updatedAt||b.createdAt)?1:-1);
+  $("rCountHead").textContent="Team comments ("+list.length+")";
+  const ul=$("rComments");ul.textContent="";
+  if(!list.length){const li=document.createElement("li");li.className="none";li.textContent="No comments yet.";ul.append(li);}
+  for(const r of list){
+    const li=document.createElement("li");
+    const h=document.createElement("div");h.className="c-head";
+    const n=document.createElement("b");n.textContent=r.rater;
+    const pill=document.createElement("span");pill.className="pill";pill.textContent=r.score+" / 10";
+    const d=document.createElement("span");d.textContent=fmtDate(r.updatedAt||r.createdAt);
+    h.append(n,pill,d);li.append(h);
+    if(r.comment){const p=document.createElement("p");p.textContent=r.comment;li.append(p);}
+    ul.append(li);
+  }
+  if(lastPanelIdea!==i.id){lastPanelIdea=i.id;$("rateMsg").textContent="";$("rateMsg").className="form-msg";prefillMine();}
+}
+function myRating(){
+  const name=rkey($("rName").value);
+  if(!name||!S.rateSel) return null;
+  return S.ratings.find(r=>r.ideaId===S.rateSel&&rkey(r.rater)===name)||null;
+}
+function prefillMine(){
+  const mine=myRating();
+  document.querySelectorAll('input[name="score"]').forEach(x=>x.checked=!!mine&&Number(x.value)===Number(mine.score));
+  $("rComment").value=mine?mine.comment:"";
+  $("rateBtn").textContent=mine?"Update my rating":"Submit rating";
+}
+$("rName").addEventListener("change",prefillMine);
+
+$("rateForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const msg=$("rateMsg");msg.className="form-msg";msg.textContent="";
+  const rater=$("rName").value.trim().replace(/\s+/g," ");
+  const picked=document.querySelector('input[name="score"]:checked');
+  const missing=[];if(!rater) missing.push("Your name");if(!picked) missing.push("a score");
+  if(missing.length){msg.classList.add("err");msg.textContent="Add "+missing.join(" and ")+".";return;}
+  const b=$("rateBtn");const label=b.textContent;b.disabled=true;b.textContent="Saving…";
+  try{
+    const data=await api("POST",{action:"rate",rating:{ideaId:S.rateSel,rater,score:Number(picked.value),comment:$("rComment").value.trim()}});
+    store.set("zr-ideas-name",rater);if(!$("fName").value) $("fName").value=rater;
+    const r=data.rating;r.score=Number(r.score);
+    S.ratings=S.ratings.filter(x=>x.id!==r.id&&!(x.ideaId===r.ideaId&&rkey(x.rater)===rkey(r.rater)));
+    S.ratings.push(r);
+    render();
+    msg.textContent=data.updated?"Your rating was updated.":"Thanks, your rating was added.";
+    toast(data.updated?"Rating updated":"Rating added");
+    $("rateBtn").textContent="Update my rating";
+  }catch(err){
+    msg.classList.add("err");b.textContent=label;
+    if(err.code==="passcode"){S.pass="";store.del("zr-ideas-pass");showGate("The passcode has changed. Enter the new one to continue.");}
+    else if(err.code==="no_idea"){msg.textContent="This idea was removed from the board. Refresh to see the current list.";}
+    else if(err.code==="missing"){msg.textContent="Add your name and pick a score from 1 to 10.";}
+    else msg.textContent="The rating wasn't saved. Check your connection and try again.";
+  }finally{b.disabled=false;}
 });
 
 /* ---------- graph ---------- */
